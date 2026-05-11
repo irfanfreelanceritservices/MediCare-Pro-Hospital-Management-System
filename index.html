@@ -1,0 +1,926 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MediCare Pro — Hospital Management System</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="styles.css"/>
+  <style>/* ── Component-level overrides & page-specific styles ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0b1120;
+      --surface:   #111827;
+      --surface2:  #1a2540;
+      --accent:    #00c9a7;
+      --accent2:   #3b82f6;
+      --danger:    #f43f5e;
+      --warn:      #f59e0b;
+      --text:      #e2e8f0;
+      --muted:     #64748b;
+      --border:    rgba(255,255,255,0.06);
+      --glow:      0 0 24px rgba(0,201,167,0.18);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      overflow-x: hidden;
+    }
+
+    /* ─── SIDEBAR ──────────────────────────────────────── */
+    .sidebar {
+      width: 240px;
+      min-height: 100vh;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      left: 0; top: 0;
+      z-index: 100;
+      transition: transform .3s ease;
+    }
+    .logo {
+      padding: 28px 24px 20px;
+      border-bottom: 1px solid var(--border);
+    }
+    .logo-mark {
+      display: flex; align-items: center; gap: 10px;
+    }
+    .logo-icon {
+      width: 36px; height: 36px;
+      background: var(--accent);
+      border-radius: 10px;
+      display: grid; place-items: center;
+      font-size: 18px;
+    }
+    .logo-text {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.2rem;
+      color: var(--text);
+      line-height: 1.1;
+    }
+    .logo-sub { font-size: .65rem; color: var(--muted); letter-spacing: .08em; text-transform: uppercase; }
+
+    nav { padding: 16px 12px; flex: 1; }
+    .nav-label { font-size: .6rem; text-transform: uppercase; letter-spacing: .12em; color: var(--muted); padding: 14px 12px 6px; }
+    .nav-item {
+      display: flex; align-items: center; gap: 12px;
+      padding: 10px 12px; border-radius: 10px;
+      cursor: pointer; color: var(--muted);
+      font-size: .88rem; font-weight: 500;
+      transition: all .2s;
+      margin-bottom: 2px;
+    }
+    .nav-item:hover { background: var(--surface2); color: var(--text); }
+    .nav-item.active { background: rgba(0,201,167,0.12); color: var(--accent); }
+    .nav-item .icon { font-size: 1.1rem; width: 20px; text-align: center; }
+    .nav-badge {
+      margin-left: auto; background: var(--danger);
+      color: #fff; font-size: .62rem; font-weight: 700;
+      padding: 2px 7px; border-radius: 99px;
+    }
+
+    .sidebar-footer {
+      padding: 16px 12px;
+      border-top: 1px solid var(--border);
+    }
+    .user-card {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 12px; border-radius: 10px;
+      background: var(--surface2);
+    }
+    .avatar {
+      width: 34px; height: 34px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent2), var(--accent));
+      display: grid; place-items: center;
+      font-size: .8rem; font-weight: 700; color: #fff;
+      flex-shrink: 0;
+    }
+    .user-info { flex: 1; min-width: 0; }
+    .user-name { font-size: .82rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .user-role { font-size: .68rem; color: var(--muted); }
+
+    /* ─── MAIN ─────────────────────────────────────────── */
+    .main {
+      margin-left: 240px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    /* ─── TOPBAR ───────────────────────────────────────── */
+    .topbar {
+      display: flex; align-items: center; gap: 16px;
+      padding: 18px 32px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+      position: sticky; top: 0; z-index: 50;
+    }
+    .topbar-title { font-family: 'DM Serif Display', serif; font-size: 1.4rem; flex: 1; }
+    .topbar-search {
+      display: flex; align-items: center; gap: 10px;
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 10px; padding: 8px 14px;
+      color: var(--muted); font-size: .85rem;
+      cursor: text; transition: border-color .2s;
+    }
+    .topbar-search:focus-within { border-color: var(--accent); }
+    .topbar-search input {
+      background: none; border: none; outline: none;
+      color: var(--text); font-size: .85rem; width: 180px;
+    }
+    .topbar-search input::placeholder { color: var(--muted); }
+    .icon-btn {
+      width: 38px; height: 38px; border-radius: 10px;
+      background: var(--surface2); border: 1px solid var(--border);
+      display: grid; place-items: center;
+      cursor: pointer; font-size: 1rem;
+      transition: all .2s; color: var(--muted);
+      position: relative;
+    }
+    .icon-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .notif-dot {
+      position: absolute; top: 7px; right: 7px;
+      width: 7px; height: 7px; border-radius: 50%;
+      background: var(--danger);
+      border: 2px solid var(--surface);
+    }
+    .date-badge {
+      font-size: .75rem; color: var(--muted);
+      white-space: nowrap;
+    }
+
+    /* ─── CONTENT ──────────────────────────────────────── */
+    .content { padding: 32px; flex: 1; }
+
+    /* ─── SECTION VISIBILITY ───────────────────────────── */
+    .section { display: none; }
+    .section.active { display: block; }
+
+    /* ─── STATS GRID ───────────────────────────────────── */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+      margin-bottom: 28px;
+    }
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 22px 22px 18px;
+      position: relative;
+      overflow: hidden;
+      transition: transform .2s, box-shadow .2s;
+      cursor: default;
+    }
+    .stat-card:hover { transform: translateY(-3px); box-shadow: var(--glow); }
+    .stat-card::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0;
+      height: 3px;
+    }
+    .stat-card.green::before  { background: var(--accent); }
+    .stat-card.blue::before   { background: var(--accent2); }
+    .stat-card.red::before    { background: var(--danger); }
+    .stat-card.yellow::before { background: var(--warn); }
+
+    .stat-icon {
+      font-size: 1.6rem; margin-bottom: 14px;
+      display: inline-block;
+    }
+    .stat-val {
+      font-size: 2rem; font-weight: 700;
+      font-family: 'DM Serif Display', serif;
+      letter-spacing: -.02em; line-height: 1;
+    }
+    .stat-label { font-size: .78rem; color: var(--muted); margin-top: 4px; }
+    .stat-change {
+      margin-top: 12px; font-size: .73rem; font-weight: 600;
+      display: flex; align-items: center; gap: 4px;
+    }
+    .stat-change.up { color: var(--accent); }
+    .stat-change.down { color: var(--danger); }
+
+    /* ─── GRID 2 COL ───────────────────────────────────── */
+    .two-col { display: grid; grid-template-columns: 1fr 340px; gap: 20px; margin-bottom: 28px; }
+
+    /* ─── TABLE CARD ───────────────────────────────────── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+    }
+    .card-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 18px 22px;
+      border-bottom: 1px solid var(--border);
+    }
+    .card-title { font-weight: 600; font-size: .95rem; }
+    .card-action {
+      font-size: .75rem; color: var(--accent); cursor: pointer;
+      font-weight: 500; background: none; border: none;
+    }
+    .card-action:hover { text-decoration: underline; }
+
+    table { width: 100%; border-collapse: collapse; }
+    thead tr { border-bottom: 1px solid var(--border); }
+    th {
+      text-align: left; padding: 12px 18px;
+      font-size: .72rem; text-transform: uppercase;
+      letter-spacing: .08em; color: var(--muted); font-weight: 600;
+    }
+    td { padding: 13px 18px; font-size: .84rem; border-bottom: 1px solid var(--border); }
+    tbody tr:last-child td { border-bottom: none; }
+    tbody tr { transition: background .15s; }
+    tbody tr:hover { background: var(--surface2); }
+
+    .status {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 3px 10px; border-radius: 99px;
+      font-size: .72rem; font-weight: 600;
+    }
+    .status::before { content: ''; width: 6px; height: 6px; border-radius: 50%; }
+    .status.confirmed { background: rgba(0,201,167,.12); color: var(--accent); }
+    .status.confirmed::before { background: var(--accent); }
+    .status.pending   { background: rgba(245,158,11,.12); color: var(--warn); }
+    .status.pending::before   { background: var(--warn); }
+    .status.cancelled { background: rgba(244,63,94,.12); color: var(--danger); }
+    .status.cancelled::before { background: var(--danger); }
+    .status.completed { background: rgba(59,130,246,.12); color: var(--accent2); }
+    .status.completed::before { background: var(--accent2); }
+
+    /* ─── ACTIVITY FEED ────────────────────────────────── */
+    .activity-list { padding: 8px 0; }
+    .activity-item {
+      display: flex; align-items: flex-start; gap: 12px;
+      padding: 12px 22px;
+      border-bottom: 1px solid var(--border);
+      transition: background .15s;
+    }
+    .activity-item:last-child { border-bottom: none; }
+    .activity-item:hover { background: var(--surface2); }
+    .a-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      margin-top: 6px; flex-shrink: 0;
+    }
+    .a-dot.green  { background: var(--accent); }
+    .a-dot.blue   { background: var(--accent2); }
+    .a-dot.red    { background: var(--danger); }
+    .a-dot.yellow { background: var(--warn); }
+    .a-text { font-size: .82rem; line-height: 1.5; }
+    .a-text strong { color: var(--text); }
+    .a-time { font-size: .68rem; color: var(--muted); margin-top: 2px; }
+
+    /* ─── DOCTORS GRID ─────────────────────────────────── */
+    .doctors-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+    .doc-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      text-align: center;
+      transition: transform .2s, box-shadow .2s;
+    }
+    .doc-card:hover { transform: translateY(-4px); box-shadow: var(--glow); }
+    .doc-avatar {
+      width: 60px; height: 60px; border-radius: 50%;
+      margin: 0 auto 14px;
+      display: grid; place-items: center;
+      font-size: 1.4rem;
+      font-weight: 700; color: #fff;
+    }
+    .doc-name { font-weight: 600; font-size: .92rem; margin-bottom: 3px; }
+    .doc-spec { font-size: .75rem; color: var(--muted); margin-bottom: 14px; }
+    .doc-stats {
+      display: flex; justify-content: center; gap: 20px;
+      font-size: .75rem;
+    }
+    .doc-stat { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+    .doc-stat span:first-child { font-weight: 700; font-size: .95rem; }
+    .doc-stat span:last-child { color: var(--muted); }
+    .doc-avail {
+      margin-top: 14px; font-size: .72rem; font-weight: 600;
+      padding: 4px 12px; border-radius: 99px;
+      display: inline-block;
+    }
+    .doc-avail.av  { background: rgba(0,201,167,.12); color: var(--accent); }
+    .doc-avail.bsy { background: rgba(244,63,94,.12); color: var(--danger); }
+
+    /* ─── PATIENTS TABLE SECTION ───────────────────────── */
+    .section-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 22px;
+    }
+    .section-title { font-family: 'DM Serif Display', serif; font-size: 1.6rem; }
+    .btn {
+      padding: 9px 18px; border-radius: 10px;
+      font-size: .83rem; font-weight: 600;
+      border: none; cursor: pointer; transition: all .2s;
+    }
+    .btn-primary { background: var(--accent); color: #0b1120; }
+    .btn-primary:hover { background: #00b494; }
+    .btn-outline {
+      background: transparent; color: var(--muted);
+      border: 1px solid var(--border);
+    }
+    .btn-outline:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* ─── CHART BARS ───────────────────────────────────── */
+    .mini-chart { padding: 18px 22px 8px; }
+    .chart-bars {
+      display: flex; align-items: flex-end; gap: 6px;
+      height: 80px;
+    }
+    .bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 5px; }
+    .bar {
+      width: 100%; border-radius: 4px 4px 0 0;
+      background: var(--accent);
+      opacity: .7;
+      transition: opacity .2s;
+      cursor: pointer;
+    }
+    .bar:hover { opacity: 1; }
+    .bar.blue { background: var(--accent2); }
+    .bar-label { font-size: .62rem; color: var(--muted); }
+
+    /* ─── APPOINTMENTS SECTION ─────────────────────────── */
+    .appt-list { padding: 0; }
+    .appt-item {
+      display: flex; align-items: center; gap: 16px;
+      padding: 16px 22px;
+      border-bottom: 1px solid var(--border);
+      transition: background .15s;
+    }
+    .appt-item:last-child { border-bottom: none; }
+    .appt-item:hover { background: var(--surface2); }
+    .appt-time {
+      min-width: 70px; font-size: .78rem; color: var(--muted);
+      font-weight: 600; text-align: center;
+    }
+    .appt-divider { width: 2px; height: 36px; border-radius: 2px; flex-shrink: 0; }
+    .appt-info { flex: 1; }
+    .appt-name { font-size: .88rem; font-weight: 600; }
+    .appt-doc  { font-size: .74rem; color: var(--muted); margin-top: 2px; }
+    .appt-actions { display: flex; gap: 8px; }
+    .appt-btn {
+      padding: 5px 12px; border-radius: 8px;
+      font-size: .72rem; font-weight: 600; border: none; cursor: pointer;
+    }
+    .appt-btn.confirm { background: rgba(0,201,167,.15); color: var(--accent); }
+    .appt-btn.confirm:hover { background: rgba(0,201,167,.25); }
+    .appt-btn.cancel  { background: rgba(244,63,94,.12); color: var(--danger); }
+    .appt-btn.cancel:hover  { background: rgba(244,63,94,.22); }
+
+    /* ─── NOTIFICATION TOAST ───────────────────────────── */
+    #toast {
+      position: fixed; bottom: 28px; right: 28px;
+      background: var(--surface);
+      border: 1px solid var(--accent);
+      border-radius: 12px;
+      padding: 14px 20px;
+      font-size: .83rem;
+      box-shadow: 0 8px 32px rgba(0,0,0,.4);
+      z-index: 999;
+      display: flex; align-items: center; gap: 10px;
+      transform: translateY(80px); opacity: 0;
+      transition: all .35s cubic-bezier(.34,1.56,.64,1);
+      pointer-events: none;
+    }
+    #toast.show { transform: translateY(0); opacity: 1; }
+
+    /* ─── ANIMATIONS ───────────────────────────────────── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .section.active > * {
+      animation: fadeUp .4s ease both;
+    }
+    .section.active > *:nth-child(2) { animation-delay: .06s; }
+    .section.active > *:nth-child(3) { animation-delay: .12s; }
+
+    /* ─── RESPONSIVE ───────────────────────────────────── */
+    @media (max-width: 1100px) {
+      .stats-grid { grid-template-columns: repeat(2,1fr); }
+      .two-col { grid-template-columns: 1fr; }
+      .doctors-grid { grid-template-columns: repeat(2,1fr); }
+    }
+    @media (max-width: 700px) {
+      .sidebar { transform: translateX(-100%); }
+      .sidebar.open { transform: translateX(0); }
+      .main { margin-left: 0; }
+      .stats-grid { grid-template-columns: 1fr; }
+      .doctors-grid { grid-template-columns: 1fr; }
+    }
+
+    /* ─── OVERVIEW CHART CARD ──────────────────────────── */
+    .full-chart-card { margin-bottom: 28px; }
+    .full-bars {
+      display: flex; align-items: flex-end; gap: 10px;
+      height: 140px; padding: 18px 22px 4px;
+    }
+    .full-bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+    .full-bar {
+      width: 100%; border-radius: 6px 6px 0 0;
+      cursor: pointer; transition: opacity .2s;
+    }
+    .full-bar:hover { opacity: .8; }
+    .full-bar-label { font-size: .68rem; color: var(--muted); }
+    .chart-legend {
+      display: flex; gap: 18px; padding: 0 22px 18px;
+      align-items: center;
+    }
+    .legend-item { display: flex; align-items: center; gap: 6px; font-size: .75rem; color: var(--muted); }
+    .legend-dot { width: 8px; height: 8px; border-radius: 50%; }
+  </style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+  <div class="logo">
+    <div class="logo-mark">
+      <div class="logo-icon">🏥</div>
+      <div>
+        <div class="logo-text">MediCare Pro</div>
+        <div class="logo-sub">Hospital Management</div>
+      </div>
+    </div>
+  </div>
+
+  <nav>
+    <div class="nav-label">Main Menu</div>
+    <div class="nav-item active" onclick="showSection('dashboard',this)">
+      <span class="icon">📊</span> Dashboard
+    </div>
+    <div class="nav-item" onclick="showSection('appointments',this)">
+      <span class="icon">📅</span> Appointments
+      <span class="nav-badge">8</span>
+    </div>
+    <div class="nav-item" onclick="showSection('patients',this)">
+      <span class="icon">🧑‍⚕️</span> Patients
+    </div>
+    <div class="nav-item" onclick="showSection('doctors',this)">
+      <span class="icon">👨‍⚕️</span> Doctors
+    </div>
+    <div class="nav-label">Management</div>
+    <div class="nav-item" onclick="showSection('pharmacy',this)">
+      <span class="icon">💊</span> Pharmacy
+    </div>
+    <div class="nav-item" onclick="showSection('billing',this)">
+      <span class="icon">💳</span> Billing
+    </div>
+    <div class="nav-item" onclick="toast('Settings coming soon!')">
+      <span class="icon">⚙️</span> Settings
+    </div>
+  </nav>
+
+  <div class="sidebar-footer">
+    <div class="user-card">
+      <div class="avatar">AD</div>
+      <div class="user-info">
+        <div class="user-name">Dr. Admin</div>
+        <div class="user-role">Super Admin</div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+  <!-- TOPBAR -->
+  <header class="topbar">
+    <div class="topbar-title" id="page-title">Dashboard</div>
+    <div class="topbar-search">
+      <span>🔍</span>
+      <input type="text" placeholder="Search patients, doctors…" oninput="liveSearch(this.value)"/>
+    </div>
+    <div class="icon-btn" onclick="toast('3 new notifications!')">
+      🔔 <span class="notif-dot"></span>
+    </div>
+    <div class="icon-btn" onclick="toast('Profile settings!')">👤</div>
+    <div class="date-badge" id="live-date"></div>
+  </header>
+
+  <!-- CONTENT -->
+  <div class="content">
+
+    <!-- ── DASHBOARD ── -->
+    <section class="section active" id="sec-dashboard">
+
+      <div class="stats-grid">
+        <div class="stat-card green">
+          <div class="stat-icon">🧑‍⚕️</div>
+          <div class="stat-val" id="cnt-patients">1,284</div>
+          <div class="stat-label">Total Patients</div>
+          <div class="stat-change up">▲ 12% from last month</div>
+        </div>
+        <div class="stat-card blue">
+          <div class="stat-icon">📅</div>
+          <div class="stat-val" id="cnt-appts">48</div>
+          <div class="stat-label">Today's Appointments</div>
+          <div class="stat-change up">▲ 5 more than yesterday</div>
+        </div>
+        <div class="stat-card red">
+          <div class="stat-icon">🏨</div>
+          <div class="stat-val">32</div>
+          <div class="stat-label">Occupied Beds</div>
+          <div class="stat-change down">▼ 3 discharged today</div>
+        </div>
+        <div class="stat-card yellow">
+          <div class="stat-icon">💰</div>
+          <div class="stat-val">₨ 2.4M</div>
+          <div class="stat-label">Monthly Revenue</div>
+          <div class="stat-change up">▲ 8% from last month</div>
+        </div>
+      </div>
+
+      <div class="full-chart-card card">
+        <div class="card-header">
+          <span class="card-title">Patient Visits — Weekly Overview</span>
+          <button class="card-action">View Report →</button>
+        </div>
+        <div class="full-bars" id="week-chart"></div>
+        <div class="chart-legend">
+          <div class="legend-item"><div class="legend-dot" style="background:var(--accent)"></div>Outpatient</div>
+          <div class="legend-item"><div class="legend-dot" style="background:var(--accent2)"></div>Inpatient</div>
+        </div>
+      </div>
+
+      <div class="two-col">
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Recent Appointments</span>
+            <button class="card-action" onclick="showSection('appointments', document.querySelector('[onclick*=appointments]'))">View All →</button>
+          </div>
+          <table>
+            <thead><tr><th>Patient</th><th>Doctor</th><th>Time</th><th>Status</th></tr></thead>
+            <tbody id="recent-appts"></tbody>
+          </table>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Live Activity</span>
+            <button class="card-action" onclick="refreshActivity()">Refresh</button>
+          </div>
+          <div class="activity-list" id="activity-feed"></div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ── APPOINTMENTS ── -->
+    <section class="section" id="sec-appointments">
+      <div class="section-header">
+        <div class="section-title">Appointments</div>
+        <div style="display:flex;gap:10px">
+          <button class="btn btn-outline" onclick="toast('Exported to PDF!')">⬇ Export</button>
+          <button class="btn btn-primary" onclick="toast('New appointment form opening…')">+ New Appointment</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Today — <span id="appt-day"></span></span>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-outline" onclick="filterAppts('all')">All</button>
+            <button class="btn btn-outline" onclick="filterAppts('pending')">Pending</button>
+            <button class="btn btn-outline" onclick="filterAppts('confirmed')">Confirmed</button>
+          </div>
+        </div>
+        <div class="appt-list" id="appt-list"></div>
+      </div>
+    </section>
+
+    <!-- ── PATIENTS ── -->
+    <section class="section" id="sec-patients">
+      <div class="section-header">
+        <div class="section-title">Patient Records</div>
+        <button class="btn btn-primary" onclick="toast('Add new patient form!')">+ Add Patient</button>
+      </div>
+      <div class="card">
+        <table>
+          <thead><tr><th>#</th><th>Name</th><th>Age</th><th>Gender</th><th>Diagnosis</th><th>Ward</th><th>Status</th><th>Action</th></tr></thead>
+          <tbody id="patient-table"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ── DOCTORS ── -->
+    <section class="section" id="sec-doctors">
+      <div class="section-header">
+        <div class="section-title">Medical Staff</div>
+        <button class="btn btn-primary" onclick="toast('Add new doctor!')">+ Add Doctor</button>
+      </div>
+      <div class="doctors-grid" id="doctors-grid"></div>
+    </section>
+
+    <!-- ── PHARMACY ── -->
+    <section class="section" id="sec-pharmacy">
+      <div class="section-header">
+        <div class="section-title">Pharmacy Inventory</div>
+        <button class="btn btn-primary" onclick="toast('Add medicine!')">+ Add Medicine</button>
+      </div>
+      <div class="card">
+        <table>
+          <thead><tr><th>#</th><th>Medicine</th><th>Category</th><th>Stock</th><th>Price</th><th>Status</th></tr></thead>
+          <tbody id="pharma-table"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ── BILLING ── -->
+    <section class="section" id="sec-billing">
+      <div class="section-header">
+        <div class="section-title">Billing & Invoices</div>
+        <button class="btn btn-primary" onclick="toast('Generate invoice!')">+ New Invoice</button>
+      </div>
+      <div class="stats-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:22px">
+        <div class="stat-card green"><div class="stat-icon">✅</div><div class="stat-val">₨ 1.8M</div><div class="stat-label">Collected This Month</div></div>
+        <div class="stat-card yellow"><div class="stat-icon">⏳</div><div class="stat-val">₨ 420K</div><div class="stat-label">Pending Payments</div></div>
+        <div class="stat-card red"><div class="stat-icon">❌</div><div class="stat-val">₨ 180K</div><div class="stat-label">Overdue</div></div>
+      </div>
+      <div class="card">
+        <table>
+          <thead><tr><th>Invoice #</th><th>Patient</th><th>Service</th><th>Amount</th><th>Date</th><th>Status</th></tr></thead>
+          <tbody id="billing-table"></tbody>
+        </table>
+      </div>
+    </section>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+
+<!-- TOAST -->
+<div id="toast">✅ <span id="toast-msg"></span></div>
+
+<script>
+/* ─── DATA ─────────────────────────────────── */
+const patients = [
+  {id:'P001',name:'Ahmed Raza',age:34,gender:'Male',diag:'Hypertension',ward:'Cardiology',status:'confirmed'},
+  {id:'P002',name:'Fatima Malik',age:28,gender:'Female',diag:'Diabetes Type 2',ward:'Endocrinology',status:'pending'},
+  {id:'P003',name:'Usman Khan',age:52,gender:'Male',diag:'Pneumonia',ward:'Pulmonology',status:'completed'},
+  {id:'P004',name:'Ayesha Siddiqui',age:19,gender:'Female',diag:'Appendicitis',ward:'Surgery',status:'confirmed'},
+  {id:'P005',name:'Bilal Hassan',age:45,gender:'Male',diag:'Kidney Stones',ward:'Urology',status:'pending'},
+  {id:'P006',name:'Zara Anwer',age:31,gender:'Female',diag:'Migraine',ward:'Neurology',status:'completed'},
+  {id:'P007',name:'Tariq Mehmood',age:60,gender:'Male',diag:'Arthritis',ward:'Orthopedics',status:'cancelled'},
+  {id:'P008',name:'Nadia Iqbal',age:25,gender:'Female',diag:'Anemia',ward:'General',status:'confirmed'},
+];
+
+const doctors = [
+  {name:'Dr. Sana Mirza',spec:'Cardiologist',patients:124,exp:'12 yrs',avail:true,emoji:'👩‍⚕️',color:'#00c9a7'},
+  {name:'Dr. Imran Baig',spec:'Neurologist',patients:98,exp:'9 yrs',avail:false,emoji:'👨‍⚕️',color:'#3b82f6'},
+  {name:'Dr. Hina Shahid',spec:'Pediatrician',patients:210,exp:'15 yrs',avail:true,emoji:'👩‍⚕️',color:'#f59e0b'},
+  {name:'Dr. Kamran Ali',spec:'Orthopedic Surgeon',patients:76,exp:'7 yrs',avail:true,emoji:'👨‍⚕️',color:'#8b5cf6'},
+  {name:'Dr. Sadia Noor',spec:'Endocrinologist',patients:143,exp:'11 yrs',avail:false,emoji:'👩‍⚕️',color:'#f43f5e'},
+  {name:'Dr. Faisal Rauf',spec:'Urologist',patients:89,exp:'8 yrs',avail:true,emoji:'👨‍⚕️',color:'#06b6d4'},
+];
+
+const appointments = [
+  {time:'09:00',patient:'Ahmed Raza',doctor:'Dr. Sana Mirza',type:'Cardiology',status:'confirmed',color:'#00c9a7'},
+  {time:'09:30',patient:'Fatima Malik',doctor:'Dr. Sadia Noor',type:'Endocrinology',status:'pending',color:'#f59e0b'},
+  {time:'10:00',patient:'Zara Anwer',doctor:'Dr. Imran Baig',type:'Neurology',status:'confirmed',color:'#3b82f6'},
+  {time:'10:30',patient:'Bilal Hassan',doctor:'Dr. Faisal Rauf',type:'Urology',status:'pending',color:'#f59e0b'},
+  {time:'11:00',patient:'Ayesha Siddiqui',doctor:'Dr. Kamran Ali',type:'Orthopedics',status:'confirmed',color:'#8b5cf6'},
+  {time:'11:30',patient:'Nadia Iqbal',doctor:'Dr. Hina Shahid',type:'General',status:'confirmed',color:'#00c9a7'},
+  {time:'02:00',patient:'Tariq Mehmood',doctor:'Dr. Kamran Ali',type:'Orthopedics',status:'cancelled',color:'#f43f5e'},
+  {time:'02:30',patient:'Usman Khan',doctor:'Dr. Sana Mirza',type:'Pulmonology',status:'completed',color:'#3b82f6'},
+];
+
+const medicines = [
+  {name:'Paracetamol 500mg',cat:'Analgesic',stock:2400,price:'₨ 12',status:'confirmed'},
+  {name:'Amoxicillin 250mg',cat:'Antibiotic',stock:800,price:'₨ 45',status:'confirmed'},
+  {name:'Metformin 500mg',cat:'Antidiabetic',stock:1200,price:'₨ 28',status:'confirmed'},
+  {name:'Lisinopril 10mg',cat:'Antihypertensive',stock:54,price:'₨ 65',status:'pending'},
+  {name:'Cetirizine 10mg',cat:'Antihistamine',stock:0,price:'₨ 18',status:'cancelled'},
+  {name:'Omeprazole 20mg',cat:'PPI',stock:930,price:'₨ 35',status:'confirmed'},
+];
+
+const invoices = [
+  {inv:'INV-2401',patient:'Ahmed Raza',service:'Cardiac Consultation + ECG',amount:'₨ 4,500',date:'11 May',status:'completed'},
+  {inv:'INV-2402',patient:'Fatima Malik',service:'Lab Tests + Consultation',amount:'₨ 2,800',date:'11 May',status:'pending'},
+  {inv:'INV-2403',patient:'Usman Khan',service:'X-Ray + Admission (2 days)',amount:'₨ 18,000',date:'10 May',status:'completed'},
+  {inv:'INV-2404',patient:'Ayesha Siddiqui',service:'Appendectomy Surgery',amount:'₨ 85,000',date:'09 May',status:'confirmed'},
+  {inv:'INV-2405',patient:'Bilal Hassan',service:'Ultrasound + Consultation',amount:'₨ 3,200',date:'09 May',status:'cancelled'},
+];
+
+const activity = [
+  {col:'green',text:'<strong>Ahmed Raza</strong> checked in for Cardiac Consultation',time:'2 min ago'},
+  {col:'blue', text:'<strong>Dr. Sana Mirza</strong> completed 3 consultations',time:'10 min ago'},
+  {col:'yellow',text:'<strong>Pharmacy</strong> low stock alert: Lisinopril 10mg',time:'18 min ago'},
+  {col:'green',text:'<strong>Nadia Iqbal</strong> appointment confirmed for 11:30 AM',time:'25 min ago'},
+  {col:'red',  text:'<strong>Tariq Mehmood</strong> cancelled appointment',time:'34 min ago'},
+  {col:'blue', text:'<strong>Invoice INV-2403</strong> paid — ₨ 18,000 received',time:'1 hr ago'},
+];
+
+const weekData = [
+  {day:'Mon',out:45,inp:12},{day:'Tue',out:60,inp:18},
+  {day:'Wed',out:38,inp:9},{day:'Thu',out:72,inp:22},
+  {day:'Fri',out:55,inp:15},{day:'Sat',out:30,inp:8},
+  {day:'Sun',out:20,inp:5},
+];
+
+/* ─── RENDER ────────────────────────────────── */
+function renderAll() {
+  renderRecentAppts();
+  renderActivity();
+  renderWeekChart();
+  renderPatients();
+  renderDoctors();
+  renderAppointments();
+  renderPharmacy();
+  renderBilling();
+  updateDate();
+}
+
+function renderRecentAppts() {
+  const tbody = document.getElementById('recent-appts');
+  tbody.innerHTML = appointments.slice(0,5).map(a => `
+    <tr>
+      <td>${a.patient}</td>
+      <td style="color:var(--muted)">${a.doctor}</td>
+      <td style="color:var(--muted)">${a.time}</td>
+      <td><span class="status ${a.status}">${capitalize(a.status)}</span></td>
+    </tr>
+  `).join('');
+}
+
+function renderActivity() {
+  document.getElementById('activity-feed').innerHTML = activity.map(a => `
+    <div class="activity-item">
+      <div class="a-dot ${a.col}"></div>
+      <div>
+        <div class="a-text">${a.text}</div>
+        <div class="a-time">${a.time}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderWeekChart() {
+  const maxVal = Math.max(...weekData.map(d => d.out + d.inp));
+  document.getElementById('week-chart').innerHTML = weekData.map(d => {
+    const hOut = Math.round((d.out / maxVal) * 110);
+    const hInp = Math.round((d.inp / maxVal) * 110);
+    return `
+      <div class="full-bar-wrap">
+        <div style="display:flex;align-items:flex-end;gap:3px;height:120px">
+          <div class="full-bar" style="background:var(--accent);height:${hOut}px;width:14px" title="Outpatient: ${d.out}"></div>
+          <div class="full-bar blue" style="background:var(--accent2);height:${hInp}px;width:14px" title="Inpatient: ${d.inp}"></div>
+        </div>
+        <div class="full-bar-label">${d.day}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+function renderPatients() {
+  document.getElementById('patient-table').innerHTML = patients.map(p => `
+    <tr>
+      <td style="color:var(--muted);font-size:.75rem">${p.id}</td>
+      <td><strong>${p.name}</strong></td>
+      <td>${p.age}</td>
+      <td>${p.gender}</td>
+      <td>${p.diag}</td>
+      <td style="color:var(--muted)">${p.ward}</td>
+      <td><span class="status ${p.status}">${capitalize(p.status)}</span></td>
+      <td>
+        <button class="appt-btn confirm" onclick="toast('Opening ${p.name} record…')">View</button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function renderDoctors() {
+  document.getElementById('doctors-grid').innerHTML = doctors.map(d => `
+    <div class="doc-card">
+      <div class="doc-avatar" style="background:${d.color}22;color:${d.color};font-size:2rem">${d.emoji}</div>
+      <div class="doc-name">${d.name}</div>
+      <div class="doc-spec">${d.spec}</div>
+      <div class="doc-stats">
+        <div class="doc-stat"><span>${d.patients}</span><span>Patients</span></div>
+        <div class="doc-stat"><span>${d.exp}</span><span>Experience</span></div>
+      </div>
+      <span class="doc-avail ${d.avail ? 'av' : 'bsy'}">${d.avail ? '✅ Available' : '🔴 Busy'}</span>
+    </div>
+  `).join('');
+}
+
+function renderAppointments(filter='all') {
+  const list = document.getElementById('appt-list');
+  const filtered = filter === 'all' ? appointments : appointments.filter(a => a.status === filter);
+  list.innerHTML = filtered.map(a => `
+    <div class="appt-item">
+      <div class="appt-time">${a.time}<br><span style="font-size:.64rem;color:var(--muted)">${a.type}</span></div>
+      <div class="appt-divider" style="background:${a.color}"></div>
+      <div class="appt-info">
+        <div class="appt-name">${a.patient}</div>
+        <div class="appt-doc">${a.doctor}</div>
+      </div>
+      <span class="status ${a.status}">${capitalize(a.status)}</span>
+      ${a.status === 'pending' ? `
+        <div class="appt-actions">
+          <button class="appt-btn confirm" onclick="confirmAppt(this,'${a.patient}')">Confirm</button>
+          <button class="appt-btn cancel" onclick="toast('Appointment cancelled')">Cancel</button>
+        </div>` : ''}
+    </div>
+  `).join('');
+}
+
+function renderPharmacy() {
+  document.getElementById('pharma-table').innerHTML = medicines.map((m,i) => `
+    <tr>
+      <td style="color:var(--muted)">${i+1}</td>
+      <td><strong>${m.name}</strong></td>
+      <td style="color:var(--muted)">${m.cat}</td>
+      <td>${m.stock === 0 ? '<span style="color:var(--danger);font-weight:600">Out of Stock</span>' : m.stock}</td>
+      <td>${m.price}</td>
+      <td><span class="status ${m.stock===0?'cancelled':m.stock<100?'pending':'confirmed'}">${m.stock===0?'Out of Stock':m.stock<100?'Low Stock':'In Stock'}</span></td>
+    </tr>
+  `).join('');
+}
+
+function renderBilling() {
+  document.getElementById('billing-table').innerHTML = invoices.map(i => `
+    <tr>
+      <td style="color:var(--accent);font-size:.78rem;font-weight:600">${i.inv}</td>
+      <td><strong>${i.patient}</strong></td>
+      <td style="color:var(--muted);font-size:.8rem">${i.service}</td>
+      <td style="font-weight:600">${i.amount}</td>
+      <td style="color:var(--muted)">${i.date}</td>
+      <td><span class="status ${i.status}">${capitalize(i.status)}</span></td>
+    </tr>
+  `).join('');
+}
+
+/* ─── INTERACTIONS ──────────────────────────── */
+function showSection(id, el) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('sec-'+id).classList.add('active');
+  if (el) el.classList.add('active');
+  const titles = {dashboard:'Dashboard',appointments:'Appointments',patients:'Patient Records',doctors:'Medical Staff',pharmacy:'Pharmacy',billing:'Billing'};
+  document.getElementById('page-title').textContent = titles[id] || id;
+}
+
+function filterAppts(f) { renderAppointments(f); }
+
+function confirmAppt(btn, name) {
+  btn.closest('.appt-actions').previousElementSibling.className = 'status confirmed';
+  btn.closest('.appt-actions').previousElementSibling.textContent = 'Confirmed';
+  btn.closest('.appt-actions').remove();
+  toast(`Appointment confirmed for ${name}`);
+  document.getElementById('cnt-appts').textContent = parseInt(document.getElementById('cnt-appts').textContent) + 1;
+}
+
+function refreshActivity() {
+  document.getElementById('activity-feed').style.opacity = '0.4';
+  setTimeout(() => {
+    renderActivity();
+    document.getElementById('activity-feed').style.opacity = '1';
+    toast('Activity refreshed!');
+  }, 600);
+}
+
+function liveSearch(val) {
+  if (!val) return;
+  const matches = patients.filter(p => p.name.toLowerCase().includes(val.toLowerCase()));
+  if (matches.length) toast(`Found: ${matches[0].name} — ${matches[0].diag}`);
+}
+
+function capitalize(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+
+function toast(msg) {
+  const t = document.getElementById('toast');
+  document.getElementById('toast-msg').textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+function updateDate() {
+  const now = new Date();
+  document.getElementById('live-date').textContent = now.toLocaleDateString('en-PK',{weekday:'short',day:'numeric',month:'short',year:'numeric'});
+  document.getElementById('appt-day').textContent = now.toLocaleDateString('en-PK',{weekday:'long',day:'numeric',month:'long'});
+}
+
+/* ─── INIT ──────────────────────────────────── */
+renderAll();
+setInterval(updateDate, 60000);
+</script>
+</body>
+</html>
