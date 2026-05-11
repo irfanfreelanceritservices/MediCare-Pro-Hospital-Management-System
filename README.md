@@ -40,8 +40,6 @@ Designed for clinics and hospitals to streamline patient care, appointments, and
 
 **MediCare Pro** is a fully functional, single-page Hospital Management System designed to solve real-world healthcare administration challenges. Built for Pakistan's growing healthcare sector, it provides hospital staff with an intuitive interface to manage daily operations — from patient check-ins to billing.
 
-> Built as part of a PSEB (Pakistan Software Export Board) registered software project portfolio. This demonstrates production-grade frontend development capability using core web technologies.
-
 ### Why MediCare Pro?
 
 - 🇵🇰 **Pakistan-centric** — PKR currency, local context, Urdu-ready structure
